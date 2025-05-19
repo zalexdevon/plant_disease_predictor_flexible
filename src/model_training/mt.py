@@ -53,12 +53,9 @@ def create_and_save_models_before_training(
 
         # Save model
         # TODO: d
-        print("Lỗi optimizer ko đúng cách ở đây START")
+        print("Thay đổi ở đây ")
         # d
-        model.save(model_path)
-        # TODO: d
-        print("Lỗi optimizer ko đúng cách ở đây END")
-        # d
+        model.save(model_path, include_optimizer=True)
 
 
 def create_callbacks(callbacks, model_path, target_score, model_checkpoint_monitor):
