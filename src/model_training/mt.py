@@ -2,6 +2,7 @@ import tensorflow as tf
 from Mylib import tf_myclasses, tf_myfuncs, myfuncs
 import os
 import time
+from src.utils import classes
 
 
 def load_train_ds_and_val_ds(train_ds_path, val_ds_path):
@@ -58,7 +59,7 @@ def create_callbacks(callbacks, model_path, target_score, model_checkpoint_monit
     callbacks = [tf_myfuncs.copy_one_callback(callback) for callback in callbacks]
 
     callbacks = [
-        tf_myclasses.CustomisedModelCheckpoint(
+        classes.CustomisedModelCheckpoint(
             filepath=model_path,
             monitor=model_checkpoint_monitor,
             indicator=target_score,

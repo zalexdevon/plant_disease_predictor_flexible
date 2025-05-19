@@ -1,0 +1,77 @@
+from tensorflow.keras import layers
+from tensorflow import keras
+import pandas as pd
+import numpy as np
+
+
+class CustomisedModelCheckpoint(keras.callbacks.Callback):
+    """Callback để lưu model tốt nhất theo từng epoch
+
+    Attributes:
+        filepath (str): đường dẫn đến best model
+        monitor (str): chỉ số đánh giá (đánh giá theo **val**), *vd:* val_accuracy, val_loss , ...
+        indicator (str): chỉ tiêu
+
+    Examples:
+        Với **monitor = val_accuracy và indicator = 0.99**
+
+        Tìm model thỏa val_accuracy > 0.99 và train_accuracy > 0.99 (1) và val_accuracy là lớn nhất trong số đó
+
+        Nếu không thỏa (1) thì lấy theo val_accuracy lớn nhất
+
+    """
+
+    def __init__(self, filepath: str, monitor: str, indicator: float):
+        super().__init__()
+        self.filepath = filepath
+        self.monitor = monitor
+        self.indicator = indicator
+
+    def on_train_begin(self, logs=None):
+        self.sign_for_score = (
+            1  # Nếu scoring là loss thì lấy âm -> quy về tìm lớn nhất thôi
+        )
+        if (
+            self.monitor.endswith("loss")
+            or self.monitor.endswith("mse")
+            or self.monitor.endswith("mae")
+        ):
+            self.indicator = -self.indicator
+            self.sign_for_score = -1
+
+        self.per_epoch_val_scores = []
+        self.per_epoch_train_scores = []
+        self.models = []
+
+    def on_epoch_end(self, epoch, logs=None):
+        self.models.append(self.model)
+        self.per_epoch_val_scores.append(logs.get(self.monitor) * self.sign_for_score)
+        self.per_epoch_train_scores.append(
+            logs.get(self.monitor[4:]) * self.sign_for_score
+        )
+
+    def on_train_end(self, logs=None):
+        # Tìm model tốt nhất
+        self.per_epoch_val_scores = np.asarray(self.per_epoch_val_scores)
+        self.per_epoch_train_scores = np.asarray(self.per_epoch_train_scores)
+
+        indexs_good_model = np.where(
+            (self.per_epoch_val_scores > self.indicator)
+            & (self.per_epoch_train_scores > self.indicator)
+        )[0]
+
+        index_best_model = None
+        if (
+            len(indexs_good_model) == 0
+        ):  # Nếu ko có model nào đạt chỉ tiêu thì lấy cái tốt nhất
+            index_best_model = np.argmax(self.per_epoch_val_scores)
+        else:
+            val_series = pd.Series(
+                self.per_epoch_val_scores[indexs_good_model], index=indexs_good_model
+            )
+            index_best_model = val_series.idxmax()
+
+        best_model = self.models[index_best_model]
+
+        # Lưu model tốt nhất
+        best_model.save(self.filepath)
