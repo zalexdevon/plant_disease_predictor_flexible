@@ -2,7 +2,7 @@ import tensorflow as tf
 from Mylib import tf_myclasses, tf_myfuncs, myfuncs
 import os
 import time
-from src.utils import classes
+from src.utils import classes, funcs
 
 
 def load_train_ds_and_val_ds(train_ds_path, val_ds_path):
@@ -69,6 +69,13 @@ def create_callbacks(callbacks, model_path, target_score, model_checkpoint_monit
     return callbacks
 
 
+def get_train_val_scoring_to_plot(train_scoring, val_scoring, scoring):
+    if scoring == "accuracy":
+        train_scoring, val_scoring = train_scoring * 100, val_scoring * 100
+
+    return train_scoring, val_scoring
+
+
 def train_and_save_models(
     model_training_path,
     model_indices,
@@ -129,6 +136,10 @@ def train_and_save_models(
 
         # Lưu dữ liệu để vẽ biểu đồ
         model_name_in_plot = f"{model_name}_{model_index}"
+
+        train_scoring, val_scoring = get_train_val_scoring_to_plot(
+            train_scoring, val_scoring, scoring
+        )
 
         myfuncs.save_python_object(
             os.path.join(plot_dir, f"{model_name_in_plot}.pkl"),
