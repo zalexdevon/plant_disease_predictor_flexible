@@ -98,7 +98,7 @@ def train_and_save_models(
     )
 
     start_time = time.time()  # Bắt đầu tính thời gian train model
-    for model_index in zip(model_indices):
+    for model_index in model_indices:
         # Load model
         model_path = os.path.join(model_training_path, f"{model_index}.keras")
         model = tf.keras.models.load_model(model_path)
