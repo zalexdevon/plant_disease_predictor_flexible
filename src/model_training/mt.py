@@ -118,7 +118,13 @@ def train_and_save_models(
 
         # Đánh giá model
         ## Load model với epoch tốt nhất được lưu bởi CustomisedModelCheckpoint !!!!
+        # TODO: d
+        print(f"Bắt đầu load model để đánh giá tại {model_path}")
+        # d
         best_model_among_epochs = tf.keras.models.load_model(model_path)
+        # TODO: d
+        print(f"Kết thúc load model để đánh giá tại {model_path}")
+        # d
         train_scoring = best_model_among_epochs.evaluate(train_ds, verbose=0)[
             1
         ]  # chỉ số đầu luôn là loss, sau đó là scoring

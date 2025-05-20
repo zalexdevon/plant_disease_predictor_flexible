@@ -55,6 +55,7 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
         self.per_epoch_val_scores = np.asarray(self.per_epoch_val_scores)
         self.per_epoch_train_scores = np.asarray(self.per_epoch_train_scores)
 
+        # Tìm các model thỏa train_scoring, val_scoring > target (đề ra)
         indexs_good_model = np.where(
             (self.per_epoch_val_scores > self.indicator)
             & (self.per_epoch_train_scores > self.indicator)
@@ -65,6 +66,7 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
         print(f"index của các model tốt là: {indexs_good_model}")
         # d
 
+        # Tìm model tốt nhất
         index_best_model = None
         if (
             len(indexs_good_model) == 0
@@ -83,4 +85,10 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
         best_model = self.models[index_best_model]
 
         # Lưu model tốt nhất
+        # TODO: d
+        print(f"Bắt đầu save model tốt nhất tại path = {self.filepath}")
+        # d
         best_model.save(self.filepath)
+        # TODO: d
+        print(f"Kết thúc save model tốt nhất tại path = {self.filepath}")
+        # d
