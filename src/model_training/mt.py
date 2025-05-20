@@ -87,6 +87,10 @@ def train_and_save_models(
         f"===========Bắt đầu train {num_models} model name = {model_name}===============\n"
     )
 
+    # TODO: d
+    print("Run v1")
+    # d
+
     start_time = time.time()  # Bắt đầu tính thời gian train model
     for model_index in model_indices:
         # Load model
