@@ -95,7 +95,7 @@ def train_and_save_models(
     )
 
     # TODO: d
-    print("Run v1")
+    print("Run v2")
     # d
 
     start_time = time.time()  # Bắt đầu tính thời gian train model
