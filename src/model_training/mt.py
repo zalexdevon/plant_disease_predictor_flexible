@@ -139,6 +139,11 @@ def train_and_save_models(
             callbacks=model_callbacks,
         )
         print(f"Kết thúc train model index {model_name} - {model_index}")
+
+        # TODO: d
+        print("Đi kiểm tra đi cha !!!!!!")
+        # d
+
         num_epochs_before_stopping = len(history.history["loss"])
 
         # Đánh giá model
