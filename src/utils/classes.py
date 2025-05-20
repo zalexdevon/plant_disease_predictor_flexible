@@ -60,6 +60,11 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
             & (self.per_epoch_train_scores > self.indicator)
         )[0]
 
+        # TODO: d
+        print("Bắt đầu tìm model tốt nhất theo epoch")
+        print(f"index của các model tốt là: {indexs_good_model}")
+        # d
+
         index_best_model = None
         if (
             len(indexs_good_model) == 0
@@ -70,6 +75,10 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
                 self.per_epoch_val_scores[indexs_good_model], index=indexs_good_model
             )
             index_best_model = val_series.idxmax()
+
+        # TODO: d
+        print(f"index best model thông qua modelcheckpoint = {index_best_model}")
+        # d
 
         best_model = self.models[index_best_model]
 
