@@ -2,6 +2,8 @@ from tensorflow.keras import layers
 from tensorflow import keras
 import pandas as pd
 import numpy as np
+import os
+from Mylib import myfuncs
 
 
 class CustomisedModelCheckpoint(keras.callbacks.Callback):
@@ -9,8 +11,11 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
 
     Attributes:
         filepath (str): đường dẫn đến best model
+        scoring_path (str): đường dẫn lưu các scoring ứng với best model tìm được
         monitor (str): chỉ số đánh giá (đánh giá theo **val**), *vd:* val_accuracy, val_loss , ...
         indicator (str): chỉ tiêu
+
+
 
     Examples:
         Với **monitor = val_accuracy và indicator = 0.99**
@@ -21,9 +26,12 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
 
     """
 
-    def __init__(self, filepath: str, monitor: str, indicator: float):
+    def __init__(
+        self, filepath: str, scoring_path: str, monitor: str, indicator: float
+    ):
         super().__init__()
         self.filepath = filepath
+        self.scoring_path = scoring_path
         self.monitor = monitor
         self.indicator = indicator
 
@@ -83,12 +91,18 @@ class CustomisedModelCheckpoint(keras.callbacks.Callback):
         # d
 
         best_model = self.models[index_best_model]
+        best_model_train_scoring = self.per_epoch_train_scores[index_best_model]
+        best_model_val_scoring = self.per_epoch_val_scores[index_best_model]
 
-        # Lưu model tốt nhất
+        # Lưu model tốt nhất và train,val scoring tương ứng
         # TODO: d
         print(f"Bắt đầu save model tốt nhất tại path = {self.filepath}")
         # d
         best_model.save(self.filepath)
+        myfuncs.save_python_object(
+            self.scoring_path, (best_model_train_scoring, best_model_val_scoring)
+        )
+
         # TODO: d
         print(f"Kết thúc save model tốt nhất tại path = {self.filepath}")
         # d

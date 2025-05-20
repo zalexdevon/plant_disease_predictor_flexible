@@ -42,12 +42,19 @@ def create_and_save_models_before_training(
         model.save(model_path)
 
 
-def create_callbacks(callbacks, model_path, target_score, model_checkpoint_monitor):
+def create_callbacks(
+    callbacks,
+    model_path,
+    best_model_scoring_path,
+    target_score,
+    model_checkpoint_monitor,
+):
     callbacks = [tf_myfuncs.copy_one_callback(callback) for callback in callbacks]
 
     callbacks = [
         classes.CustomisedModelCheckpoint(
             filepath=model_path,
+            scoring_path=best_model_scoring_path,
             monitor=model_checkpoint_monitor,
             indicator=target_score,
         ),
@@ -97,7 +104,10 @@ def train_and_save_models(
         model_path = os.path.join(model_training_path, f"{model_index}.keras")
         model = tf.keras.models.load_model(model_path)
 
-        best_model_path = os.path.join(model_training_path, f"{model_index}_best.keras")
+        # Đường dẫn để lưu scoring ứng với best model
+        best_model_scoring_path = os.path.join(
+            model_training_path, f"{model_index}_scoring.pkl"
+        )
 
         # Create optimizer cho model
         model_optimizer = tf_myfuncs.copy_one_optimizer(optimizer)
@@ -107,7 +117,11 @@ def train_and_save_models(
 
         # Create callbacks cho model
         model_callbacks = create_callbacks(
-            callbacks, best_model_path, target_score, model_checkpoint_monitor
+            callbacks,
+            model_path,
+            best_model_scoring_path,
+            target_score,
+            model_checkpoint_monitor,
         )
 
         # Train model
@@ -123,18 +137,7 @@ def train_and_save_models(
         num_epochs_before_stopping = len(history.history["loss"])
 
         # Đánh giá model
-        ## Load model với epoch tốt nhất được lưu bởi CustomisedModelCheckpoint !!!!
-        # TODO: d
-        print(f"Bắt đầu load model để đánh giá tại {best_model_path}")
-        # d
-        best_model_among_epochs = tf.keras.models.load_model(best_model_path)
-        # TODO: d
-        print(f"Kết thúc load model để đánh giá tại {best_model_path}")
-        # d
-        train_scoring = best_model_among_epochs.evaluate(train_ds, verbose=0)[
-            1
-        ]  # chỉ số đầu luôn là loss, sau đó là scoring
-        val_scoring = best_model_among_epochs.evaluate(val_ds, verbose=0)[1]
+        train_scoring, val_scoring = myfuncs.load_python_object(best_model_scoring_path)
 
         ## In kết quả
         print("Kết quả của model")
