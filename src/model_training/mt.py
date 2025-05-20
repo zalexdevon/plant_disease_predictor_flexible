@@ -93,6 +93,8 @@ def train_and_save_models(
         model_path = os.path.join(model_training_path, f"{model_index}.keras")
         model = tf.keras.models.load_model(model_path)
 
+        best_model_path = os.path.join(model_training_path, f"{model_index}_best.keras")
+
         # Create optimizer cho model
         model_optimizer = tf_myfuncs.copy_one_optimizer(optimizer)
 
@@ -101,7 +103,7 @@ def train_and_save_models(
 
         # Create callbacks cho model
         model_callbacks = create_callbacks(
-            callbacks, model_path, target_score, model_checkpoint_monitor
+            callbacks, best_model_path, target_score, model_checkpoint_monitor
         )
 
         # Train model
@@ -121,7 +123,7 @@ def train_and_save_models(
         # TODO: d
         print(f"Bắt đầu load model để đánh giá tại {model_path}")
         # d
-        best_model_among_epochs = tf.keras.models.load_model(model_path)
+        best_model_among_epochs = tf.keras.models.load_model(best_model_path)
         # TODO: d
         print(f"Kết thúc load model để đánh giá tại {model_path}")
         # d
