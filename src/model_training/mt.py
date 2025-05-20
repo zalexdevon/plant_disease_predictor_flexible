@@ -12,9 +12,7 @@ def load_train_ds_and_val_ds(train_ds_path, val_ds_path):
     return train_ds, val_ds
 
 
-def create_model_from_layers_optimizer(
-    model, model_optimizer, loss, metrics, image_size, channels
-):
+def create_model_from_layers_optimizer(model, image_size, channels):
     input_layer = tf.keras.Input(
         (image_size, image_size, channels)
     )  # Tạo sẵn layer Input trước
@@ -23,13 +21,8 @@ def create_model_from_layers_optimizer(
     for layer in model:
         x = layer(x)
 
+    # Tạo model thôi, chưa cần compile
     model = tf.keras.Model(inputs=input_layer, outputs=x)
-
-    model.compile(
-        optimizer=model_optimizer,
-        loss=loss,
-        metrics=metrics,
-    )
 
     return model
 
@@ -38,24 +31,15 @@ def create_and_save_models_before_training(
     model_training_path,
     model_indices,
     models,
-    optimizer,
-    loss,
-    metrics,
     image_size,
     channels,
 ):
     for model_index, model in zip(model_indices, models):
         model_path = f"{model_training_path}/{model_index}.keras"
-        model_optimizer = tf_myfuncs.copy_one_optimizer(optimizer)
-        model = create_model_from_layers_optimizer(
-            model, model_optimizer, loss, metrics, image_size, channels
-        )
+        model = create_model_from_layers_optimizer(model, image_size, channels)
 
         # Save model
-        # TODO: d
-        print("Thay đổi ở đây ")
-        # d
-        model.save(model_path, include_optimizer=True)
+        model.save(model_path)
 
 
 def create_callbacks(callbacks, model_path, target_score, model_checkpoint_monitor):
@@ -92,6 +76,9 @@ def train_and_save_models(
     model_checkpoint_monitor,
     scoring,
     plot_dir,
+    optimizer,
+    loss,
+    metrics,
 ):
     tf.config.run_functions_eagerly(True)  # Bật eager execution
     tf.data.experimental.enable_debug_mode()  # Bật chế độ eager cho tf.data
@@ -105,6 +92,12 @@ def train_and_save_models(
         # Load model
         model_path = os.path.join(model_training_path, f"{model_index}.keras")
         model = tf.keras.models.load_model(model_path)
+
+        # Create optimizer cho model
+        model_optimizer = tf_myfuncs.copy_one_optimizer(optimizer)
+
+        # Compile model trước khi training
+        model.compile(optimizer=model_optimizer, loss=loss, metrics=metrics)
 
         # Create callbacks cho model
         model_callbacks = create_callbacks(
